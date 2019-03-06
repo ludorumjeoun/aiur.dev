@@ -14,19 +14,124 @@
             background-color: black;
             background-image: url('./pattern.png');
             background-size: cover;
+            min-width: 640px;
         }
         body {
+            min-width: 640px;
             width: 100vw;
             height: 100vh;
             color: white;
+            background-image: url('./aiur.jpg');
+            background-size: 100%;
+            background-repeat: no-repeat;
+            background-position: top;
         }
         h2 {
             text-align: center;
+            position: absolute;
+            top: calc(56.25vw + 20px);
+            left: 0;
+            right: 0;
+        }
+        #donations {
+            text-align: center;
+            display: inline-block;
+            padding-top: 20px;
+            height: 56.25vw;
+            width: 100%;
+        }
+        .donation-item {
+            font-size: 1rem;
+        }
+        .donation-item .from {
+            font-size: .7rem;
+            font-weight: bold;
+        }
+        input[name=message] {
+            width: 240px;
+            padding: 2px;
+            margin: 0;
+            vertical-align: top;
+            border: 0;
+            border-radius: 4px;
+            height: 24px;
+            font-size: 1rem;
+            color: white;
+            background: rgba(255, 255, 255, 0.2);
+            outline-color: white;
+            line-height: 24px;
+        }
+        div.donate-label {
+            font-size: .8rem;
+        }
+        div.submit {
+            width: 60px;
+            font-size: 1rem;
+            color: white;
+            padding: 2px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            display: inline-block;
+            border-radius: 4px;
+            line-height: 24px;
+            vertical-align: top;
         }
     </style>
+    <script src="./jquery-3.3.1.min.js"></script>
+    <script>
+        function fromHex(h) {
+            var s = '';
+            for (var i = 0; i < h.length; i += 2) {
+                s += String.fromCharCode(parseInt(h.substr(i, 2), 16))
+            }
+            return s;
+        }
+        function toHex(s) {
+            var h = '';
+            for (var i = 0; i < s.length; i++) {
+                h += s.charCodeAt(i).toString(16);
+            }
+            return h;
+        }
+        var eth_address = "0x00BB1b2Fcb71F604a9D441d33D36B752e2E8A52F";
+        $(function() {
+            var url = "https://api.etherscan.io/api?module=account&action=txlist&address="+ eth_address + "&startblock=0&endblock=99999999&sort=desc";
+            $.get(url, {
+                crossDomain: true
+            }).done(function(response) {
+                response.result.forEach(function(tx) {
+                    var message = tx.input.replace(/^0x/, '').match(/.{2}/gim).map(function(v) {
+                        return String.fromCharCode(parseInt(v, 16));
+                    }).join('').replace(/^0x/, '');
+                    $('#donations').append($("<div/>", {
+                        "class": "donation-item"
+                    }).html([
+                        $("<p/>", {
+                            "text": message
+                        }),
+                        $("<div/>", {
+                            "class": "from",
+                            "text": " from " + tx.from
+                        })
+                    ]));
+                });
+            })
+            $('.submit').on('click', function() {
+                var message = $("input[name=message]").val();
+                location.href="ethereum:"+ eth_address+"?data=0x"+ toHex(message);
+                console.log("ethereum:" + eth_address + "?data=0x" + toHex(message));
+            })
+        })
+    </script>
 </head>
 <body>
-    <img src="./aiur.jpg" width="100%"/>
+    <div id="donations">
+        <input type="text" name="message" maxlength="64">
+        <div class="submit">SUBMIT</div>
+        <div class="donate-label">
+            Donate to <b>Aiur</b> and leave a message.
+        </div>
+    </div>
     <h2>My Life For Aiur.</h2>
 </body>
 </html>
