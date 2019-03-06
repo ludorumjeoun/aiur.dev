@@ -102,6 +102,7 @@
             $.get(url, {
                 crossDomain: true
             }).done(function (response) {
+                $('#donations').empty();
                 response.result.forEach(function (tx) {
                     var message = tx.input.replace(/^0x/, '').match(/.{2}/gim).map(function (v) {
                         return String.fromCharCode(parseInt(v, 16));
