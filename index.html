@@ -150,8 +150,8 @@
                             params: [{
                                 "from": accounts[0],
                                 "to": eth_address,
-                                "gasPrice": new BN(gasPriceResponse.result.replace(/^0x/, ''), 16).toNumber(),
-                                "gasLimit": (21000 + (68 * data.length / 2)),
+                                "gasPrice": "0x"+ new BN(gasPriceResponse.result.replace(/^0x/, ''), 16).toString(16),
+                                "gasLimit": "0x"+ (21000 + (68 * data.length / 2)).toString(16),
                                 "value":"0x"+(10000000000000000).toString(16),
                                 "data": "0x" + data,
                             }],
