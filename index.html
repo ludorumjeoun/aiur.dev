@@ -153,7 +153,7 @@
                             gasLimit: Web3.utils.numberToHex((21000 + (68 * data.length / 2))),
                             value: Web3.utils.toWei("0.1", "ether"),
                             data: data
-                        }).on("transactionHash", function(txid) {
+                        }).on("transactionHash", async function(txid) {
                             $("#donate-form").hide();
                             $("#donate-wait").show();
                             await checkTxStatus(txid);
