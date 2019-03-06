@@ -158,6 +158,7 @@
                             $("#donate-wait").show();
                             await checkTxStatus(txid);
                             setTimeout(function() {
+                                $("input[name=message]").val('');
                                 $("#donate-form").show();
                                 $("#donate-wait").hide();
                                 getDonationList();
@@ -173,7 +174,7 @@
 </head>
 <body>
     <div id="contents">
-        <div id="donate-submit-form">
+        <div id="donate-form">
             <input type="text" name="message" maxlength="64">
             <div class="submit">SUBMIT</div>
             <div class="donate-label">
