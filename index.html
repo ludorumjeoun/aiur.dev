@@ -138,12 +138,12 @@
             });
         }
         $(function() {
-            window.web3 = new Web3(Web3.currentProvider);
             getDonationList();
             $('.submit').on('click', async function() {
                 var message = $("input[name=message]").val();
                 var data = Web3.utils.fromUtf8(message);
                 if (window.ethereum) {
+                    window.web3 = new Web3(Web3.givenProvider);
                     window.ethereum.enable().then(async function(accounts) {
                         web3.eth.sendTransaction({
                             to: eth_address,
