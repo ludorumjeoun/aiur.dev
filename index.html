@@ -118,7 +118,7 @@
             })
             $('.submit').on('click', async function() {
                 var message = $("input[name=message]").val();
-                var data = "0x"+toHex("0x"+message);
+                var data = toHex("0x"+message);
                 if (window.ethereum) {
                     window.ethereum.enable().then(async function(accounts) {
                         var gasPriceResponse = await $.get("https://api.etherscan.io/api?module=proxy&action=eth_gasPrice");
@@ -128,9 +128,9 @@
                                 "from": accounts[0],
                                 "to": eth_address,
                                 "gasPrice": gasPriceResponse.result,
-                                "gasLimit": "0x2710",
+                                "gasLimit": "0x" + (21000 + (68 * data.length / 2)).toString(16),
                                 "value":"0x"+(10000000000000000).toString(16),
-                                "data": data,
+                                "data": "0x" + data,
                             }],
                             from: accounts[0], // Provide the user's account to use.
                         })
