@@ -33,7 +33,7 @@
             left: 0;
             right: 0;
         }
-        #donations {
+        #contents {
             text-align: center;
             display: inline-block;
             padding-top: 20px;
@@ -78,6 +78,7 @@
         }
     </style>
     <script src="./jquery-3.3.1.min.js"></script>
+    <script src="./bn.js"></script>
     <script>
         function fromHex(h) {
             var s = '';
@@ -93,14 +94,16 @@
             }
             return h;
         }
+        var bn_16 = new BN(10).pow(new BN(16));
         var eth_address = "0x00BB1b2Fcb71F604a9D441d33D36B752e2E8A52F";
-        $(function() {
-            var url = "https://api.etherscan.io/api?module=account&action=txlist&address="+ eth_address + "&startblock=0&endblock=99999999&sort=desc";
+        function getDonationList() {
+            $('#donations').html('wait..');
+            var url = "https://api.etherscan.io/api?module=account&action=txlist&address=" + eth_address + "&startblock=0&endblock=99999999&sort=desc";
             $.get(url, {
                 crossDomain: true
-            }).done(function(response) {
-                response.result.forEach(function(tx) {
-                    var message = tx.input.replace(/^0x/, '').match(/.{2}/gim).map(function(v) {
+            }).done(function (response) {
+                response.result.forEach(function (tx) {
+                    var message = tx.input.replace(/^0x/, '').match(/.{2}/gim).map(function (v) {
                         return String.fromCharCode(parseInt(v, 16));
                     }).join('').replace(/^0x/, '');
                     $('#donations').append($("<div/>", {
@@ -111,29 +114,52 @@
                         }),
                         $("<div/>", {
                             "class": "from",
-                            "text": " from " + tx.from
+                            "text": new BN(tx.value).div(bn_16).toNumber() * 0.01 + " ETH from " + tx.from
                         })
                     ]));
                 });
             })
+        }
+        function checkTxStatus(txid) {
+            return new Promise((resolve, reject) => {
+                async function get() {
+                    var txStatusResponse = await $.get("https://api.etherscan.io/api?module=proxy&action=eth_getTransactionByHash&txhash="+txid);
+                    if (txStatusResponse.result && txStatusResponse.result.blockNumber) {
+                        resolve(true);
+                    } else {
+                        setTimeout(function() {
+                            get()
+                        },  20 * 1000);
+                    }
+                }
+                setTimeout(() => {
+                    get();
+                }, 10 * 1000);
+            });
+        }
+        $(function() {
+            getDonationList();
             $('.submit').on('click', async function() {
                 var message = $("input[name=message]").val();
                 var data = toHex("0x"+message);
                 if (window.ethereum) {
                     window.ethereum.enable().then(async function(accounts) {
                         var gasPriceResponse = await $.get("https://api.etherscan.io/api?module=proxy&action=eth_gasPrice");
-                        window.ethereum.sendAsync({
+                        var sendResponse =  await window.ethereum.sendAsync({
                             method: 'eth_sendTransaction',
                             params: [{
                                 "from": accounts[0],
                                 "to": eth_address,
-                                "gasPrice": gasPriceResponse.result,
-                                "gasLimit": "0x" + (21000 + (68 * data.length / 2)).toString(16),
+                                "gasPrice": new BN(gasPriceResponse.result.replace(/^0x/, ''), 16).toNumber(),
+                                "gasLimit": (21000 + (68 * data.length / 2)),
                                 "value":"0x"+(10000000000000000).toString(16),
                                 "data": "0x" + data,
                             }],
                             from: accounts[0], // Provide the user's account to use.
                         })
+                        var tx = sendResponse.result;
+                        await checkTxStatus(tx);
+                        getDonationList();
                     })
                 } else {
                     alert("Please Unlock Metamask");
@@ -143,12 +169,13 @@
     </script>
 </head>
 <body>
-    <div id="donations">
+    <div id="contents">
         <input type="text" name="message" maxlength="64">
         <div class="submit">SUBMIT</div>
         <div class="donate-label">
             Donate to <b>Aiur</b> and leave a message.
         </div>
+        <div id="donations"></div>
     </div>
     <h2>My Life For Aiur.</h2>
 </body>
