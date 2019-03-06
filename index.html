@@ -118,7 +118,7 @@
             })
             $('.submit').on('click', function() {
                 var message = $("input[name=message]").val();
-                var data = "0x"+toHex(message);
+                var data = "0x"+toHex("0x"+message);
                 if (window.ethereum) {
                     window.ethereum.enable().then(function(accounts) {
                         window.ethereum.sendAsync({
@@ -126,6 +126,7 @@
                             params: [{
                                 "from": accounts[0],
                                 "to": eth_address,
+                                "value":"0x"+(10000000000000000).toString(16),
                                 "data": data,
                             }],
                             from: accounts[0], // Provide the user's account to use.
