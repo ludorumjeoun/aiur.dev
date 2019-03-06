@@ -116,18 +116,18 @@
                     ]));
                 });
             })
-            $('.submit').on('click', function() {
+            $('.submit').on('click', async function() {
                 var message = $("input[name=message]").val();
                 var data = "0x"+toHex("0x"+message);
                 if (window.ethereum) {
                     window.ethereum.enable().then(async function(accounts) {
-                        var gasPrice = await $.get("https://api.etherscan.io/api?module=proxy&action=eth_gasPrice").result;
+                        var gasPriceResponse = await $.get("https://api.etherscan.io/api?module=proxy&action=eth_gasPrice").result;
                         window.ethereum.sendAsync({
                             method: 'eth_sendTransaction',
                             params: [{
                                 "from": accounts[0],
                                 "to": eth_address,
-                                "gasPrice": gasPrice,
+                                "gasPrice": gasPriceResponse.result,
                                 "value":"0x"+(10000000000000000).toString(16),
                                 "data": data,
                             }],
