@@ -118,8 +118,22 @@
             })
             $('.submit').on('click', function() {
                 var message = $("input[name=message]").val();
-                location.href="ethereum:"+ eth_address+"?data=0x"+ toHex(message);
-                console.log("ethereum:" + eth_address + "?data=0x" + toHex(message));
+                var data = "0x"+toHex(message);
+                if (window.ethereum) {
+                    window.ethereum.enable().then(function(accounts) {
+                        window.ethereum.sendAsync({
+                            method: 'eth_sendTransaction',
+                            params: [{
+                                "from": accounts[0],
+                                "to": eth_address,
+                                "data": data,
+                            }],
+                            from: accounts[0], // Provide the user's account to use.
+                        })
+                    })
+                } else {
+                    alert("Please Unlock Metamask");
+                }
             })
         })
     </script>
