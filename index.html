@@ -153,9 +153,15 @@
                             gasLimit: Web3.utils.numberToHex((21000 + (68 * data.length / 2))),
                             value: Web3.utils.toWei("0.1", "ether"),
                             data: data
-                        }).on("receipt", function(receipt) {
-                            console.log(receipt);
-                            getDonationList();
+                        }).on("transactionHash", function(txid) {
+                            $("#donate-form").hide();
+                            $("#donate-wait").show();
+                            await checkTxStatus(txid);
+                            setTimeout(function() {
+                                $("#donate-form").show();
+                                $("#donate-wait").hide();
+                                getDonationList();
+                            }, 5 * 1000);
                         })
                     })
                 } else {
@@ -167,10 +173,15 @@
 </head>
 <body>
     <div id="contents">
-        <input type="text" name="message" maxlength="64">
-        <div class="submit">SUBMIT</div>
-        <div class="donate-label">
-            Donate to <b>Aiur</b> and leave a message.
+        <div id="donate-submit-form">
+            <input type="text" name="message" maxlength="64">
+            <div class="submit">SUBMIT</div>
+            <div class="donate-label">
+                Donate to <b>Aiur</b> and leave a message.
+            </div>
+        </div>
+        <div id="donate-wait" style="display:none;">
+            My Life For Aiur!
         </div>
         <div id="donations"></div>
     </div>
