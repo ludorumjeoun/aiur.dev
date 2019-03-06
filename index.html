@@ -145,9 +145,12 @@
                 if (window.ethereum) {
                     window.web3 = new Web3(Web3.givenProvider);
                     window.ethereum.enable().then(async function(accounts) {
+                        var gasPriceResponse = await $.get("https://api.etherscan.io/api?module=proxy&action=eth_gasPrice");
                         web3.eth.sendTransaction({
                             to: eth_address,
                             from: accounts[0],
+                            gasPrice: gasPriceResponse.result,
+                            gasLimit: Web3.utils.numberToHex((21000 + (68 * data.length / 2))),
                             value: Web3.utils.toWei("0.1", "ether"),
                             data: data
                         }).on("receipt", function(receipt) {
